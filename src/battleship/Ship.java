@@ -5,6 +5,7 @@ public class Ship {
 	private int size;
 	private int[][] coordinates;
 	private int marker;
+	private boolean isSunk;
 	
 	public String getType() {
 		return type;
@@ -38,11 +39,20 @@ public class Ship {
 		this.marker = marker;
 	}
 	
+	public boolean getIsSunk() {
+		return isSunk;
+	}
+	
+	public void setIsSunk(boolean isSunk) {
+		this.isSunk = isSunk;
+	}
+	
 	/**
 	 * Changes the ship's hit coordinate from board location coordinates to -1, -1
 	 * 
 	 * @param coordinate	Contains x, y values for the coordinate to be hit
 	 */
+	/*
 	public void hitCoordinate(int[] coordinate) {
 		for (int x = 0; x < coordinates.length; x++) {
 			if(coordinates[x][0] == coordinate[0] && coordinates[x][1] == coordinate[1]) {
@@ -57,6 +67,7 @@ public class Ship {
 	 * 
 	 * @return	true if the ship has been sunk, false if the ship is still afloat
 	 */
+	/*
 	public boolean isSunk() {
 		boolean allCoordsHit = true;
 		for (int x = 0; x < coordinates.length; x++) {
@@ -68,6 +79,6 @@ public class Ship {
 		}
 		return allCoordsHit;
 	}
-	
+	*/
 	
 }

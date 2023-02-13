@@ -4,8 +4,10 @@ public class Board {
 	int widthAndHeight;
 	Ship[] ships;
 	int[][] board;
+	int neutralMarker = 0;
 	int hitMarker = -1;
 	int missMarker = -2;
+	Gui gui = new Gui();
 	
 	public Board(int widthAndHeight) {
 		this.widthAndHeight = widthAndHeight;
@@ -29,5 +31,86 @@ public class Board {
 		// Based on the size of the ship, set coordinates
 		// Ensure that the coordinates don't conflict with other boats
 		// But do I need to track the ship on the board and also within the ships coordinates array?
+		for (int i = 0; i < ships.length; i++) {
+			generateShipCoordinates(ships[i]);
+		}
+	}
+	
+	public void generateShipCoordinates(Ship ship) {
+		//TODO: is 0 == false in Java? Use mod 2 to either get 0 or 1
+		boolean isHorizontal = Math.round(Math.random() * 10) > 5;
+		while (true) {
+			int startCoordX = (int) Math.round(Math.random() * widthAndHeight);
+			int startCoordY = (int) Math.round(Math.random() * widthAndHeight);
+			
+			if (isAvailablePosition(ship.getSize(), isHorizontal, startCoordX, startCoordY)) {
+				setShipCoordinates(ship, isHorizontal, startCoordX, startCoordY);
+				break;
+			}
+		}
+	}
+	
+	public boolean isAvailablePosition(int size, boolean isHorizontal, int startCoordX, int startCoordY) {
+		boolean isValidCoordinates = true;
+		for (int i = 0; i < size; i++) {
+			if (isHorizontal) {
+				if(startCoordY + i > widthAndHeight) {
+					isValidCoordinates = false;
+				} else if (board[startCoordX][startCoordY + i] != 0) {
+					isValidCoordinates = false;
+				}
+			} else {
+				if(startCoordX + i > widthAndHeight) {
+					isValidCoordinates = false;
+				} else if (board[startCoordX + i][startCoordY] != 0) {
+					isValidCoordinates = false;
+				}
+			}
+		}
+		return isValidCoordinates;
+	}
+	
+	public void setShipCoordinates(Ship ship, boolean isHorizontal, int startCoordX, int startCoordY) {
+		for (int i = 0; i < ship.getSize(); i++) {
+			if (isHorizontal) {
+				board[startCoordX][startCoordY + i] = ship.getMarker(); 
+			} else {
+				board[startCoordX + i][startCoordY] = ship.getMarker();
+			}
+		}
+	}
+	
+	public void checkNewShipsSunk() {
+		for (int i = 0; i < ships.length; i++) {
+			// Only process ships that haven't been marked as sunk yet
+			if (!ships[i].getIsSunk()) {
+				if (!isShipPresent(ships[i])) {
+					ships[i].setIsSunk(true);
+					gui.showShipSunk(ships[i]);
+				}
+			}
+		}
+	}
+	
+	public boolean isShipPresent(Ship ship) {
+		for (int x = 0; x < widthAndHeight; x++) {
+			for (int y = 0; y < widthAndHeight; y++) {
+				if (board[x][y] == ship.getMarker()) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+	
+	public boolean isGameOver() {
+		for (int x = 0; x < widthAndHeight; x++) {
+			for (int y = 0; y < widthAndHeight; y++) {
+				if (board[x][y] != neutralMarker && board[x][y] != hitMarker && board[x][y] != missMarker) {
+					return false;
+				}
+			}
+		}
+		return true;
 	}
 }
