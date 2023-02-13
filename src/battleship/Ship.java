@@ -5,7 +5,7 @@ public class Ship {
 	private int size;
 	private int[][] coordinates;
 	private int marker;
-	private boolean isSunk;
+	private boolean isSunk = false;
 	
 	public String getType() {
 		return type;

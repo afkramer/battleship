@@ -12,10 +12,15 @@ public class Game {
 			player.takeTurn(board);
 			if(board.isGameOver()) {
 				gui.displayGameOver(player);
+				if (!gui.getPlayAgain()) {
+					gui.displayThanksForPlaying();
+					break;
+				} else {
+					board = new Board(10);
+					player.resetTriesCount();
+				}
 			}
-			if (!gui.getPlayAgain()) {
-				break;
-			}
+			
 		}
 	}
 	

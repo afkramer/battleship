@@ -1,7 +1,7 @@
 package battleship;
 
 public class Board {
-	int widthAndHeight;
+	int size;
 	Ship[] ships;
 	int[][] board;
 	int neutralMarker = 0;
@@ -10,9 +10,29 @@ public class Board {
 	Gui gui = new Gui();
 	
 	public Board(int widthAndHeight) {
-		this.widthAndHeight = widthAndHeight;
+		this.size = widthAndHeight;
 		this.board = new int[widthAndHeight][widthAndHeight];
 		initializeShips();
+	}
+	
+	public int getSize() {
+		return size;
+	}
+	
+	public int[][] getBoard(){
+		return board;
+	}
+	
+	public int getNeutralMarker() {
+		return neutralMarker;
+	}
+	
+	public int getHitMarker() {
+		return hitMarker;
+	}
+	
+	public int getMissMarker() {
+		return missMarker;
 	}
 	
 	public void initializeShips() {
@@ -40,8 +60,8 @@ public class Board {
 		//TODO: is 0 == false in Java? Use mod 2 to either get 0 or 1
 		boolean isHorizontal = Math.round(Math.random() * 10) > 5;
 		while (true) {
-			int startCoordX = (int) Math.round(Math.random() * widthAndHeight);
-			int startCoordY = (int) Math.round(Math.random() * widthAndHeight);
+			int startCoordX = (int) Math.round(Math.random() * (size - 1));
+			int startCoordY = (int) Math.round(Math.random() * (size - 1));
 			
 			if (isAvailablePosition(ship.getSize(), isHorizontal, startCoordX, startCoordY)) {
 				setShipCoordinates(ship, isHorizontal, startCoordX, startCoordY);
@@ -50,24 +70,23 @@ public class Board {
 		}
 	}
 	
-	public boolean isAvailablePosition(int size, boolean isHorizontal, int startCoordX, int startCoordY) {
-		boolean isValidCoordinates = true;
-		for (int i = 0; i < size; i++) {
+	public boolean isAvailablePosition(int shipSize, boolean isHorizontal, int startCoordX, int startCoordY) {
+		for (int i = 0; i < shipSize; i++) {
 			if (isHorizontal) {
-				if(startCoordY + i > widthAndHeight) {
-					isValidCoordinates = false;
+				if(startCoordY + i >= size) {
+					return false;
 				} else if (board[startCoordX][startCoordY + i] != 0) {
-					isValidCoordinates = false;
+					return false;
 				}
 			} else {
-				if(startCoordX + i > widthAndHeight) {
-					isValidCoordinates = false;
+				if(startCoordX + i >= size) {
+					return false;
 				} else if (board[startCoordX + i][startCoordY] != 0) {
-					isValidCoordinates = false;
+					return false;
 				}
 			}
 		}
-		return isValidCoordinates;
+		return true;
 	}
 	
 	public void setShipCoordinates(Ship ship, boolean isHorizontal, int startCoordX, int startCoordY) {
@@ -77,6 +96,21 @@ public class Board {
 			} else {
 				board[startCoordX + i][startCoordY] = ship.getMarker();
 			}
+		}
+	}
+	
+	public void processGuess(int[] coordinatesToHit) {
+		int x = coordinatesToHit[0];
+		int y = coordinatesToHit[1];
+		if (board[x][y] == neutralMarker) {
+			board[x][y] = missMarker;
+			gui.displayMiss();
+		} else if (board[x][y] == hitMarker || board[x][y] == missMarker) {
+			gui.displaySillyGuess();
+		} else {
+			gui.displayHit();
+			board[x][y] = hitMarker;
+			checkNewShipsSunk();
 		}
 	}
 	
@@ -93,8 +127,8 @@ public class Board {
 	}
 	
 	public boolean isShipPresent(Ship ship) {
-		for (int x = 0; x < widthAndHeight; x++) {
-			for (int y = 0; y < widthAndHeight; y++) {
+		for (int x = 0; x < size; x++) {
+			for (int y = 0; y < size; y++) {
 				if (board[x][y] == ship.getMarker()) {
 					return true;
 				}
@@ -104,8 +138,8 @@ public class Board {
 	}
 	
 	public boolean isGameOver() {
-		for (int x = 0; x < widthAndHeight; x++) {
-			for (int y = 0; y < widthAndHeight; y++) {
+		for (int x = 0; x < size; x++) {
+			for (int y = 0; y < size; y++) {
 				if (board[x][y] != neutralMarker && board[x][y] != hitMarker && board[x][y] != missMarker) {
 					return false;
 				}
