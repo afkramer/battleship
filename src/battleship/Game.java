@@ -1,23 +1,26 @@
 package battleship;
 
 public class Game {
-	Board board = new Board(10);
-	Gui gui = new Gui();
-	Player player;
 	
 	public void run() {
-		gui.showWelcomeScreen();
-		player = new Player(gui.getPlayerName());
+		Board board = new Board();
+		Player player;
+		
+		Gui.showWelcomeScreen();
+		player = new Player(Gui.getPlayerName());
+		
 		while(true) {
-			player.takeTurn(board);
+			board.takeTurn(player);
+			
 			if(board.isGameOver()) {
-				gui.displayGameOver(player);
-				if (!gui.getPlayAgain()) {
-					gui.displayThanksForPlaying();
-					break;
-				} else {
-					board = new Board(10);
+				Gui.displayGameOver(player);
+				
+				if (Gui.getPlayAgain()) {
+					board = new Board();
 					player.resetTriesCount();
+				} else {
+					Gui.displayThanksForPlaying();
+					break;
 				}
 			}
 			

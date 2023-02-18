@@ -1,17 +1,23 @@
 package battleship;
 
+/*
+ * Note: 
+ * Don't put in options if they aren't going to be used or implemented!
+ * Board was originally implemented to allow the constructor to change the size of the board
+ * But it wasn't implemented or changed. Therefore it didn't make sense!
+ * 
+ */
+
 public class Board {
-	int size;
-	Ship[] ships;
-	int[][] board;
-	int neutralMarker = 0;
-	int hitMarker = -1;
-	int missMarker = -2;
-	Gui gui = new Gui();
+	private int size = Utility.getSize();
+	private Ship[] ships;
+	private int[][] board;
+	private int neutralMarker = 0;
+	private int hitMarker = -1;
+	private int missMarker = -2;
 	
-	public Board(int widthAndHeight) {
-		this.size = widthAndHeight;
-		this.board = new int[widthAndHeight][widthAndHeight];
+	public Board() {
+		this.board = new int[size][size];
 		initializeShips();
 	}
 	
@@ -21,6 +27,14 @@ public class Board {
 	
 	public int[][] getBoard(){
 		return board;
+	}
+	
+	public int getValue(Coordinate coord) {
+		return board[coord.getX()][coord.getY()];
+	}
+	
+	public void setValue(Coordinate coord, int value) {
+		board[coord.getX()][coord.getY()] = value;
 	}
 	
 	public int getNeutralMarker() {
@@ -47,69 +61,75 @@ public class Board {
 	}
 	
 	public void placeShips() {
-		// TODO: loop through each of the ships
-		// Based on the size of the ship, set coordinates
-		// Ensure that the coordinates don't conflict with other boats
-		// But do I need to track the ship on the board and also within the ships coordinates array?
 		for (int i = 0; i < ships.length; i++) {
 			generateShipCoordinates(ships[i]);
 		}
 	}
 	
 	public void generateShipCoordinates(Ship ship) {
-		//TODO: is 0 == false in Java? Use mod 2 to either get 0 or 1
-		boolean isHorizontal = Math.round(Math.random() * 10) > 5;
+		boolean isHorizontal = Math.random() > 0.5;
 		while (true) {
-			int startCoordX = (int) Math.round(Math.random() * (size - 1));
-			int startCoordY = (int) Math.round(Math.random() * (size - 1));
+			Coordinate startCoord = new Coordinate();
 			
-			if (isAvailablePosition(ship.getSize(), isHorizontal, startCoordX, startCoordY)) {
-				setShipCoordinates(ship, isHorizontal, startCoordX, startCoordY);
+			if (isAvailablePosition(ship.getSize(), isHorizontal, startCoord)) {
+				setShipCoordinates(ship, isHorizontal, startCoord);
 				break;
 			}
 		}
 	}
 	
-	public boolean isAvailablePosition(int shipSize, boolean isHorizontal, int startCoordX, int startCoordY) {
+	public boolean isAvailablePosition(int shipSize, boolean isHorizontal, Coordinate coord) {
+		// Note: in the real world -> preferred to only one return per method!
+		// Originally I had written this method to return true or false in each of the conditional branches
+		boolean isAvailable;
+		// Generate a new coordinate to be able to change it without changing the original coordinate
+		Coordinate coordToCheck = new Coordinate(coord.getX(), coord.getY());
+		
 		for (int i = 0; i < shipSize; i++) {
 			if (isHorizontal) {
-				if(startCoordY + i >= size) {
-					return false;
-				} else if (board[startCoordX][startCoordY + i] != 0) {
-					return false;
-				}
+				coordToCheck.shiftCoord(0, 1);
 			} else {
-				if(startCoordX + i >= size) {
-					return false;
-				} else if (board[startCoordX + i][startCoordY] != 0) {
-					return false;
-				}
+				coordToCheck.shiftCoord(1, 0);
+			}
+			
+			if(!coordToCheck.isValid() || getValue(coordToCheck) != neutralMarker) {
+				isAvailable = false;
+				break;
 			}
 		}
-		return true;
+		
+		isAvailable = true;
+		return isAvailable;
 	}
 	
-	public void setShipCoordinates(Ship ship, boolean isHorizontal, int startCoordX, int startCoordY) {
+	public void setShipCoordinates(Ship ship, boolean isHorizontal, Coordinate coord) {
 		for (int i = 0; i < ship.getSize(); i++) {
 			if (isHorizontal) {
-				board[startCoordX][startCoordY + i] = ship.getMarker(); 
+				coord.shiftCoord(0, 1);
+				setValue(coord, ship.getMarker());
 			} else {
-				board[startCoordX + i][startCoordY] = ship.getMarker();
+				coord.shiftCoord(1, 0);
+				setValue(coord, ship.getMarker());
 			}
 		}
 	}
 	
-	public void processGuess(int[] coordinatesToHit) {
-		int x = coordinatesToHit[0];
-		int y = coordinatesToHit[1];
-		if (board[x][y] == neutralMarker) {
-			board[x][y] = missMarker;
-			gui.displayMiss();
-		} else if (board[x][y] == hitMarker || board[x][y] == missMarker) {
-			gui.displaySillyGuess();
+	public void takeTurn(Player player) {
+		Gui.showBoard(this);
+		processGuess(Gui.getPlayerGuess());
+		player.incrementTriesCount();
+	}
+	
+	public void processGuess(Coordinate coordinatesToHit) {
+		int currValue = getValue(coordinatesToHit);
+		if (currValue == neutralMarker) {
+			setValue(coordinatesToHit, missMarker);
+			Gui.displayMiss();
+		} else if (currValue == hitMarker || currValue == missMarker) {
+			Gui.displaySillyGuess();
 		} else {
-			gui.displayHit();
-			board[x][y] = hitMarker;
+			Gui.displayHit();
+			setValue(coordinatesToHit, hitMarker);
 			checkNewShipsSunk();
 		}
 	}
@@ -120,16 +140,21 @@ public class Board {
 			if (!ships[i].getIsSunk()) {
 				if (!isShipPresent(ships[i])) {
 					ships[i].setIsSunk(true);
-					gui.showShipSunk(ships[i]);
+					Gui.showShipSunk(ships[i]);
 				}
 			}
 		}
 	}
 	
 	public boolean isShipPresent(Ship ship) {
+		Coordinate coord = new Coordinate();
 		for (int x = 0; x < size; x++) {
+			coord.setX(x);
+			
 			for (int y = 0; y < size; y++) {
-				if (board[x][y] == ship.getMarker()) {
+				coord.setY(y);
+				
+				if (getValue(coord) == ship.getMarker()) {
 					return true;
 				}
 			}
@@ -138,9 +163,15 @@ public class Board {
 	}
 	
 	public boolean isGameOver() {
+		Coordinate coord = new Coordinate();
+		int currValue;
 		for (int x = 0; x < size; x++) {
+			coord.setX(x);
+			
 			for (int y = 0; y < size; y++) {
-				if (board[x][y] != neutralMarker && board[x][y] != hitMarker && board[x][y] != missMarker) {
+				coord.setY(y);
+				currValue = getValue(coord);
+				if (currValue != neutralMarker && currValue != hitMarker && currValue != missMarker) {
 					return false;
 				}
 			}
