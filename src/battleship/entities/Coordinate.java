@@ -1,4 +1,6 @@
-package battleship;
+package battleship.entities;
+
+import battleship.utility.Utility;
 
 // TODO: how can I better combine the board class with the point class?
 // this will also be relevant for chess

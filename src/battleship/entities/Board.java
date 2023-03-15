@@ -1,4 +1,13 @@
-package battleship;
+package battleship.entities;
+
+import battleship.entities.ships.Battleship;
+import battleship.entities.ships.Carrier;
+import battleship.entities.ships.Cruiser;
+import battleship.entities.ships.PatrolBoat;
+import battleship.entities.ships.Ship;
+import battleship.entities.ships.Submarine;
+import battleship.utility.Utility;
+import battleship.view.Gui;
 
 /*
  * Note: 
@@ -105,11 +114,13 @@ public class Board {
 	public void setShipCoordinates(Ship ship, boolean isHorizontal, Coordinate coord) {
 		for (int i = 0; i < ship.getSize(); i++) {
 			if (isHorizontal) {
+				setValue(coord, ship.getMarker());
 				coord.shiftCoord(0, 1);
-				setValue(coord, ship.getMarker());
+//				setValue(coord, ship.getMarker());
 			} else {
-				coord.shiftCoord(1, 0);
 				setValue(coord, ship.getMarker());
+				coord.shiftCoord(1, 0);
+//				setValue(coord, ship.getMarker());
 			}
 		}
 	}

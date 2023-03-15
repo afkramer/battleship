@@ -1,4 +1,4 @@
-package battleship;
+package battleship.utility;
 
 public class Utility {
 	private static int size = 10;

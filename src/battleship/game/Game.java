@@ -1,4 +1,8 @@
-package battleship;
+package battleship.game;
+
+import battleship.entities.Board;
+import battleship.entities.Player;
+import battleship.view.Gui;
 
 public class Game {
 	

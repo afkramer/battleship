@@ -1,6 +1,11 @@
-package battleship;
+package battleship.view;
 
 import java.util.Scanner;
+
+import battleship.entities.Board;
+import battleship.entities.Coordinate;
+import battleship.entities.Player;
+import battleship.entities.ships.Ship;
 
 public class Gui {
 	// Note: Constants have to be static -> otherwise it's just a variable that doesn't change!
